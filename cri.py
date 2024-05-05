@@ -4,7 +4,7 @@ import random
 import telebot
 import time
 
-bot = telebot.TeleBot('YOUR_BOT_TOKEN')
+bot = telebot.TeleBot('6428474826:AAHxlVWbRp_Nchj6zLe4ui9dJds3KLOXO50')
 
 STATE_START = 0
 STATE_CHOOSE_BAT_OR_BALL = 1
