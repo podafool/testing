@@ -1,26 +1,19 @@
-import telegram
+import socket
 
-class TelegramBroadcaster:
-    def __init__(self, api_key):
-        self.bot = telegram.Bot(api_key)
+# Create a socket
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    def broadcast(self, message, group_id):
-        """Broadcasts a message to a Telegram group.
+# Set the socket to broadcast mode
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
-        Args:
-            message: The message to broadcast.
-            group_id: The ID of the Telegram group.
-        """
+# Bind the socket to a port
+sock.bind(('', 5000))
 
-        for member in self.bot.get_chat_members(group_id):
-            self.bot.send_message(member.id, message)
+# Create a message to broadcast
+message = "Hello, world!"
 
-if __name__ == '__main__':
-    api_key = 'YOUR_API_KEY'
-    broadcaster = TelegramBroadcaster(api_key)
+# Broadcast the message
+sock.sendto(message.encode(), ('<broadcast>', 5000))
 
-    # Get the ID of the Telegram group to broadcast to.
-    group_id = 'YOUR_GROUP_ID'
-
-    # Broadcast the message.
-    broadcaster.broadcast('This is a broadcast message!', group_id)
+# Close the socket
+sock.close()
