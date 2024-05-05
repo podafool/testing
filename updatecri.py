@@ -121,6 +121,6 @@ def ball(message):
         current_state = STATE_GAME_OVER
         bot.send_message(message.chat.id, 'The game is over! The final score is {}.'.format(current_score))
 
-if __name__ == __"main"__:
+if __name__ == "__main__":
     bot.polling()
   
