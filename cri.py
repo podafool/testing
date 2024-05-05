@@ -50,8 +50,8 @@ def choose_bat_or_ball(message):
 
 @bot.message_handler(func=lambda message: current_state == STATE_BAT or current_state == STATE_BALL)
 def play_game(message):
-    global current_over, current_ball, innings > 2:
-    if innings_count is None or innings_count > 2:
+    global current_over, current_ball, innings_count
+    if 'innings_count' not in globals() or innings_count > 2:
         bot.send_message(message.chat.id, 'Match is over. Thanks for playing!')
         return
 
