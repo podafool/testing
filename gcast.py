@@ -1,72 +1,90 @@
-from TelethonHell.plugins import *
+```python
+import random
+import telebot
 
-
-@hell_cmd(pattern="gcast(?:\s|$)([\s\S]*)")
-async def _(event):
-    reply_msg = await event.get_reply_message()
-    flag = str(event.text.split(" ", 2)[1])
-    file = None
-    if reply_msg:
-        OwO = reply_msg.text
-        file = reply_msg.media
-    else:
-        OwO = str(event.text.split(" ", 2)[2])
-        file = None
-    if not OwO:
-        return await parse_error(event, "Nothing given to Gcast.")
-    hell = await eor(event, "`Gcasting message...`")
-    sed = 0
-    owo = 0
-    async for chats in event.client.iter_dialogs():
-        if flag.lower() == "-all":
-            chat = chats.id
-            try:
-                await event.client.send_message(chat, message=OwO, file=file)
-                owo += 1
-            except Exception as e:
-                LOGS.info(str(e))
-                sed += 1
-        elif flag.lower() == "-pvt":
-            if chats.is_user and not chats.entity.bot:
-                chat = chats.id
-                try:
-                    await event.client.send_message(chat, message=OwO, file=file)
-                    owo += 1
-                except Exception as e:
-                    LOGS.info(str(e))
-                    sed += 1
-        elif flag.lower() == "-grp":
-            if chats.is_group:
-                chat = chats.id
-                try:
-                    await event.client.send_message(chat, message=OwO, file=file)
-                    owo += 1
-                except Exception as e:
-                    LOGS.info(str(e))
-                    sed += 1
-        else:
-            return await hell.edit(
-                "Please give a flag to Gcast message. \n\n**Available flags are:** \n• -all : To Gcast in all chats. \n• -pvt : To Gcast in private chats. \n• -grp : To Gcast in groups."
-            )
-    UwU = sed + owo
-    if flag.lower() == "-all":
-        omk = "Chats"
-    elif flag.lower() == "-pvt":
-        omk = "PM"
-    elif flag.lower() == "-grp":
-        omk = "Groups"
-        
-    text_to_send = f"**📍 Sent in :** `{owo} {omk}`\n**📍 Failed in :** `{sed} {omk}`\n**📍 Total :** `{UwU} {omk}`"
-    await hell.edit(f"**Gcast Executed Successfully !!** \n\n{text_to_send}")
-    await event.client.send_message(Config.LOGGER_ID, f"#GCAST #{flag[1:].upper()} \n\n{text_to_send}")
-
-
-CmdHelp("gcast").add_command(
-    "gcast", "<flag> <text/reply>", "Globally Broadcast the replied or given message based on flag given.", f"gcast -all Hello / {hl}gcast -grp Hello / {hl}gcast -pvt Hello"
-).add_info(
-    "Global Broadcast."
-).add_extra(
-    "🚩 Flags", "-all, -pvt, -grp"
-).add_warning(
-    "✅ Harmless Module."
-).add()
+# Create a new Telegram bot
+bot = telebot.TeleBot('6428474826:AAHxlVWbRp_Nchj6zLe4ui9dJds3KLOXO50')
+# Define the game states
+STATE_START = 0
+STATE_CHOOSE_BAT_OR_BALL = 1
+STATE_BAT = 2
+STATE_BALL = 3
+STATE_OUT = 4
+STATE_GAME_OVER = 5
+# Define the game data
+current_state = STATE_START
+current_score = 0
+current_wickets = 0
+current_batsman = None
+current_bowler = None
+# Define the game commands
+@bot.message_handler(commands=['start'])
+def start_game(message):
+global current_state
+global current_score
+global current_wickets
+global current_batsman
+global current_bowler
+current_state = STATE_CHOOSE_BAT_OR_BALL
+current_score = 0
+current_wickets = 0
+current_batsman = None
+current_bowler = None
+bot.send_message(message.chat.id, 'Welcome to the Telegram cricket game! Do you want to bat or ball first?')
+@bot.message_handler(func=lambda message: current_state == STATE_CHOOSE_BAT_OR_BALL)
+def choose_bat_or_ball(message):
+global current_state
+global current_batsman
+global current_bowler
+if message.text == 'bat':
+current_state = STATE_BAT
+current_batsman = message.from_user.id
+bot.send_message(message.chat.id, 'You have chosen to bat first. Your score is currently 0.')
+elif message.text == 'ball':
+current_state = STATE_BALL
+current_bowler = message.from_user.id
+bot.send_message(message.chat.id, 'You have chosen to ball first. The batsman is currently on 0.')
+else:
+bot.send_message(message.chat.id, 'Please choose either "bat" or "ball".')
+@bot.message_handler(func=lambda message: current_state == STATE_BAT)
+def bat(message):
+global current_score
+global current_wickets
+global current_batsman
+# Generate a random number between 0 and 6
+runs = random.randint(0, 6)
+# If the batsman scores a 0, they are out
+if runs == 0:
+current_wickets += 1
+current_batsman = None
+bot.send_message(message.chat.id, 'You are out! Your score is {}.'.format(current_score))
+# Otherwise, add the runs to the score
+else:
+current_score += runs
+bot.send_message(message.chat.id, 'You scored {} runs! Your score is now {}.'.format(runs, current_score))
+# If the batsman scores 100 runs, they are out
+if current_score >= 100:
+current_wickets += 1
+current_batsman = None
+bot.send_message(message.chat.id, 'You are out! You scored a century! Your score is {}.'.format(current_score))
+# If all 10 wickets are lost, the game is over
+if current_wickets == 10:
+current_state = STATE_GAME_OVER
+bot.send_message(message.chat.id, 'The game is over! The final score is {}.'.format(current_score))
+@bot.message_handler(func=lambda message: current_state == STATE_BALL)
+def ball(message):
+global current_score
+global current_wickets
+global current_batsman
+global current_bowler
+# Generate a random number between 0 and 6
+wickets = random.randint(0, 6)
+# If the bowler takes a wicket, the batsman is out
+if wickets == 0:
+current_wickets += 1
+current_batsman = None
+bot.send_message(message.chat.id, 'You took a wicket! The batsman is out! The score is {}.'.format(current_score))
+# Otherwise, the batsman scores a run
+else:
+current_score += 1
+bot.send_message(message.chat.id, '
