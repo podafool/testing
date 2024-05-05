@@ -91,5 +91,5 @@ def ball(message):
 def game_over(message):
     bot.send_message(message.chat.id, 'The game is already over. Start a new game by typing /start.')
 
-if __name__ ==__"main__":
+if __name__ == "__main__":
     bot.polling()
