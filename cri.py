@@ -1,4 +1,4 @@
-New cricket script
+#New cricket script
 
 import random
 import telebot
